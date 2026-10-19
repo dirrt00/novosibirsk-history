@@ -1,0 +1,30 @@
+:root{--ink:#16324a;--moss:#2f5d46;--birch:#f4f6f3;--line:#d3dcd7;--sky:#3b7ea1;--mute:#5b6b73}
+*{box-sizing:border-box}
+body{margin:0;background:var(--birch);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.hero{background:linear-gradient(180deg,rgba(22,50,74,.3),rgba(22,50,74,.88)),url(images/hero.jpg) center/cover var(--ink);color:#fff;padding:18px 20px 32px;min-height:320px;display:flex;flex-direction:column;justify-content:space-between}
+.hero nav{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:15px}
+.hero nav a{color:#fff;text-decoration:none;padding:4px 0;border-bottom:2px solid transparent}
+.hero nav a:hover,.hero nav a.here{border-bottom-color:#fff}
+.hero h1{font:600 clamp(36px,7vw,64px)/1.05 "Iowan Old Style",Georgia,serif;letter-spacing:-.02em;margin:40px 0 8px}
+.hero p{margin:0;font-size:18px;max-width:46ch;opacity:.92}
+main{max-width:960px;margin:0 auto;padding:28px 20px 60px}
+h2{font:600 28px/1.2 "Iowan Old Style",Georgia,serif;margin:0 0 12px}
+.lead{color:var(--mute);max-width:62ch;margin:0 0 20px}
+#map{height:460px;border-radius:8px;border:1px solid var(--line)}
+#map.big{height:80vh}
+.bar{display:flex;justify-content:flex-end;margin-bottom:8px}
+.filter{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px}
+.filter .year{font:600 44px/1 "Iowan Old Style",Georgia,serif}
+.filter h3{margin:10px 0 4px;font-size:18px;color:var(--moss)}
+.filter p{margin:0;max-width:62ch}
+.filter small{display:block;margin-top:10px;color:var(--mute);font-size:13px}
+input[type=range]{width:100%;accent-color:var(--sky);height:28px;margin-top:8px}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.facts{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.facts li{background:#fff;border:1px solid var(--line);border-left:4px solid var(--moss);border-radius:6px;padding:12px 16px}
+.facts b{display:block;margin-bottom:2px}
+.stub{background:#fff;border:1px dashed var(--moss);border-radius:8px;padding:20px;color:var(--mute)}
+.when{font:600 36px/1 "Iowan Old Style",Georgia,serif}
+.event{min-height:3.2em;margin:8px 0}
+.btn{border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:6px;padding:6px 12px;font-size:15px;cursor:pointer}
+footer{text-align:center;color:var(--mute);font-size:13px;padding:20px}

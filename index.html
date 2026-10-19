@@ -3,122 +3,74 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Новосибирск во времени</title>
+<title>Атлас Приобья — Новосибирская область</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<style>
-  :root { --ink:#1d2b3a; --river:#3b7ea1; --forest:#4f7a4a; --chalk:#f1f4f3; --line:#cdd7d5; }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); }
-  #map { position: absolute; inset: 0; }
-  .title { position: absolute; z-index: 500; top: 12px; left: 12px; background: var(--chalk); padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; font-weight: 600; font-size: 15px; }
-  .panel { position: absolute; z-index: 500; left: 0; right: 0; bottom: 0; background: var(--chalk); border-top: 1px solid var(--line); padding: 12px 16px 16px; display: grid; gap: 8px; max-width: 760px; margin: 0 auto; border-radius: 10px 10px 0 0; }
-  .year { font-family: "Iowan Old Style", Georgia, serif; font-size: 44px; line-height: 1; letter-spacing: -0.02em; }
-  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-  .count { font-size: 13px; color: #5b6b73; }
-  .event { font-size: 15px; line-height: 1.45; min-height: 3em; max-width: 62ch; }
-  input[type=range] { width: 100%; accent-color: var(--river); height: 28px; }
-  .ticks { display: flex; justify-content: space-between; font-size: 12px; color: #5b6b73; }
-  button.play { border: 1px solid var(--ink); background: transparent; color: var(--ink); border-radius: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
-  button.play:focus-visible, input[type=range]:focus-visible { outline: 3px solid var(--river); outline-offset: 2px; }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="map"></div>
-<div class="title">Новосибирск во времени</div>
-
-<div class="panel">
-  <div class="head">
-    <div class="year" id="yearLabel">2026</div>
-    <button class="play" id="play">Воспроизвести</button>
+<header class="hero">
+  <nav>
+    <a href="index.html" class="here">Карта области</a>
+    <a href="history.html">История города</a>
+    <a href="fauna.html">Фауна</a>
+    <a href="flora.html">Флора</a>
+  </nav>
+  <div>
+    <h1>Атлас Приобья</h1>
+    <p>Новосибирская область: карты, история и живая природа края на берегах Оби.</p>
   </div>
-  <div class="event" id="eventText"></div>
-  <input type="range" id="slider" min="1893" max="2026" step="1" value="2026" aria-label="Год">
-  <div class="ticks"><span>1893</span><span>1950</span><span>2026</span></div>
-  <div class="count" id="count"></div>
-</div>
+</header>
+
+<main>
+  <h2>Карта области</h2>
+  <p class="lead">Выберите год, и ниже появится описание эпохи. Пока карта остаётся прежней, позже она будет меняться вместе с годом.</p>
+  <div class="bar"><button class="btn" id="size" aria-pressed="false">Увеличить карту</button></div>
+  <div id="map"></div>
+
+  <section class="filter" aria-live="polite">
+    <div class="year" id="year">2026</div>
+    <h3 id="ptitle"></h3>
+    <p id="ptext"></p>
+    <input type="range" id="slider" min="1700" max="2026" step="1" value="2026" aria-label="Год">
+    <small>Двигайте ползунок от 1700 года до наших дней.</small>
+  </section>
+</main>
+<footer>Данные карты © участники OpenStreetMap</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-/* ===== ДАННЫЕ: редактируйте и дополняйте здесь =====
-   Координаты примерные: проверьте каждую точку на карте и поправьте. */
-
-// События: что происходило в городе
-const EVENTS = [
-  { year: 1893, text: "Начинается строительство железнодорожного моста через Обь. На берегу появляется посёлок строителей." },
-  { year: 1897, text: "Мост через Обь достроен. Рядом растёт станция и посёлок." },
-  { year: 1903, text: "Посёлок Ново-Николаевский получает статус города (Новониколаевск)." },
-  { year: 1926, text: "Город переименован в Новосибирск." },
-  { year: 1945, text: "Открывается Театр оперы и балета, один из крупнейших в стране." },
-  { year: 1957, text: "Основан Академгородок: научный центр в лесу у Обского моря." },
-  { year: 1959, text: "Новосибирская ГЭС завершает строительство, образуется Обское водохранилище." },
-  { year: 1986, text: "Открывается метро: Новосибирск становится городом с метрополитеном." },
-  { year: 2026, text: "Современный Новосибирск. Перетащите ползунок назад и посмотрите, как всё начиналось." }
+/* Периоды: меняйте тексты как хотите. "to" — последний год периода. */
+const PERIODS = [
+  { to: 1892, title: "Освоение Приобья", text: "Эти земли издавна населяли коренные народы, с XVII века сюда шло русское освоение. Города Новосибирска ещё нет." },
+  { to: 1925, title: "Рождение города", text: "В 1893 году начинается строительство моста через Обь, у него вырастает посёлок, а в 1903-м он становится городом Новониколаевском." },
+  { to: 1956, title: "Новосибирск и область", text: "В 1926 году город получает имя Новосибирск, в 1937-м образуется Новосибирская область. В годы войны сюда эвакуируют заводы." },
+  { to: 1991, title: "Научный и промышленный центр", text: "Появляются Академгородок, Новосибирская ГЭС и метро (1986). К началу 1960-х население города превышает миллион." },
+  { to: 2026, title: "Современность", text: "Новосибирск — самый большой город Сибири, а область сочетает степи, леса, болота и озёра." }
 ];
 
-// Места на карте: появляются с года "year"
-const PLACES = [
-  { year: 1893, name: "Станция и посёлок у моста", lat: 55.0420, lng: 82.9030, note: "Место, с которого начался город. Нынешнее здание вокзала Новосибирск-Главный построено в 1940 году." },
-  { year: 1897, name: "Железнодорожный мост через Обь", lat: 55.0035, lng: 82.8930, note: "Построен в 1893-1897 годах, ради него и возник город." },
-  { year: 1945, name: "Театр оперы и балета", lat: 55.0302, lng: 82.9230, note: "Здание строилось с начала 1930-х, театр открылся в 1945 году." },
-  { year: 1957, name: "Академгородок", lat: 54.8480, lng: 83.1050, note: "Научный городок среди соснового леса." },
-  { year: 1959, name: "Новосибирская ГЭС", lat: 54.8405, lng: 83.0575, note: "Плотина и Обское водохранилище." },
-  { year: 1986, name: "Метро, станция «Красный проспект»", lat: 55.0287, lng: 82.9215, note: "Первая линия открыта в 1986 году." }
-];
-
-/* Старый план города (когда он у вас будет): положите картинку рядом и раскомментируйте.
-   Углы: [[юг, запад], [север, восток]] в координатах.
-   const plan1930 = L.imageOverlay('plan1930.jpg', [[54.98, 82.85], [55.07, 82.98]], { opacity: 0.8 });
-   и добавляйте/убирайте его в update() по условию года. */
-
-/* ===== КАРТА ===== */
-const map = L.map('map').setView([55.03, 82.92], 12);
+const map = L.map('map').setView([55.0, 80.0], 6);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; участники <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
-
-const markers = PLACES.map(p => {
-  const m = L.circleMarker([p.lat, p.lng], { radius: 9, color: '#1d2b3a', weight: 2, fillColor: '#3b7ea1', fillOpacity: 0.9 });
-  m.bindPopup('<strong>' + p.name + '</strong><br>' + p.year + '<br>' + p.note);
-  return m;
-});
+L.marker([55.03, 82.92]).addTo(map).bindPopup('Новосибирск');
 
 const slider = document.getElementById('slider');
-const yearLabel = document.getElementById('yearLabel');
-const eventText = document.getElementById('eventText');
-const count = document.getElementById('count');
-
 function update() {
-  const year = Number(slider.value);
-  yearLabel.textContent = year;
-
-  let shown = 0;
-  PLACES.forEach((p, i) => {
-    if (p.year <= year) { if (!map.hasLayer(markers[i])) markers[i].addTo(map); shown++; }
-    else if (map.hasLayer(markers[i])) map.removeLayer(markers[i]);
-  });
-  count.textContent = 'Мест на карте: ' + shown + ' из ' + PLACES.length;
-
-  let current = null;
-  EVENTS.forEach(e => { if (e.year <= year) current = e; });
-  eventText.textContent = current ? current.year + ': ' + current.text : 'До основания города на этом месте были берег Оби и лес.';
+  const y = Number(slider.value);
+  const p = PERIODS.find(p => y <= p.to);
+  document.getElementById('year').textContent = y;
+  document.getElementById('ptitle').textContent = p.title;
+  document.getElementById('ptext').textContent = p.text;
 }
-
 slider.addEventListener('input', update);
-
-let timer = null;
-const playBtn = document.getElementById('play');
-playBtn.addEventListener('click', () => {
-  if (timer) { clearInterval(timer); timer = null; playBtn.textContent = 'Воспроизвести'; return; }
-  if (Number(slider.value) >= Number(slider.max)) slider.value = slider.min;
-  playBtn.textContent = 'Пауза';
-  timer = setInterval(() => {
-    if (Number(slider.value) >= Number(slider.max)) { clearInterval(timer); timer = null; playBtn.textContent = 'Воспроизвести'; return; }
-    slider.value = Number(slider.value) + 1;
-    update();
-  }, 120);
+const sizeBtn = document.getElementById('size');
+sizeBtn.addEventListener('click', () => {
+  const big = document.getElementById('map').classList.toggle('big');
+  sizeBtn.textContent = big ? 'Уменьшить карту' : 'Увеличить карту';
+  sizeBtn.setAttribute('aria-pressed', big);
+  map.invalidateSize();
 });
-
 update();
 </script>
 </body>
